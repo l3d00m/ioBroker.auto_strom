@@ -1,0 +1,251 @@
+<html>
+
+<head>
+
+  <!-- Load ioBroker scripts and styles-->
+  <link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
+  <link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+  <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css" />
+  <link type="text/css" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css" />
+
+  <script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+  <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
+
+  <!-- these files always have to be included -->
+  <script type="text/javascript" src="../../js/translate.js"></script>
+  <script type="text/javascript" src="../../lib/js/materialize.js"></script>
+  <script type="text/javascript" src="../../js/adapter-settings.js"></script>
+
+  <!-- Load our own files -->
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <script type="text/javascript" src="words.js"></script>
+  <style>
+    .m .col .select-wrapper+label {
+      top: -26px;
+    }
+
+    .m span {
+      font-size: 0.9em;
+    }
+  </style>
+  <!-- you have to define 2 functions in the global scope: -->
+  <script type="text/javascript">
+    var devices = null;
+
+    // the function loadSettings has to exist ...
+    function sort() {
+      $("#jsGrid").jsGrid("sort", {
+        field: "priority",
+        order: "asc",
+      });
+    }
+
+    function checkPriorities(new_item) {
+      devices = $("#jsGrid").jsGrid("option", "data");
+      var arrayLength = devices.length;
+      for (var i = 0; i < arrayLength; i++) {
+        if (
+          devices[i].priority == new_item.priority &&
+          devices[i].id != new_item.id
+        ) {
+          console.log(
+            "Duplicate prio detected with " + devices[i].id + ", changed!"
+          );
+          devices[i].priority = Number(devices[i].priority) + 1;
+          checkPriorities(devices[i]);
+          return;
+        }
+      }
+      $("#jsGrid").jsGrid("reset");
+    }
+
+    function load(settings, onChange) {
+      if (!settings) return;
+      $("#null_offset")
+        .val(settings["null_offset"])
+        .on("change", () => onChange())
+        .on("keyup", () => onChange());
+      $("#winter_mode")
+        .prop("checked", settings["winter_mode"])
+        .on("change", () => onChange())
+        .on("keyup", () => onChange());
+
+      devices = settings["devices"];
+
+      $("#jsGrid").jsGrid({
+        width: "100%",
+
+        inserting: true,
+        editing: true,
+        sorting: true,
+        pageSize: 100,
+
+        data: devices,
+        onItemInserted: function (args) {
+          checkPriorities(args.item);
+          onChange(true);
+          sort();
+        },
+        onItemUpdated: function (args) {
+          checkPriorities(args.item);
+          onChange(true);
+          sort();
+        },
+        onItemDeleted: function (args) {
+          onChange(true);
+        },
+        onDataLoaded: function (args) {
+          sort();
+        },
+
+        fields: [
+          {
+            name: "id",
+            type: "text",
+            title: "ID des Objekts",
+            width: 160,
+            validate: "required",
+          },
+          {
+            name: "priority",
+            type: "number",
+            title: "Nr.",
+            width: 40,
+            validate: "required",
+          },
+          {
+            name: "verbrauch",
+            title: "Verbrauch",
+            type: "number",
+            validate: {
+              message: "Verbrauch / Triggerwert ist positiv anzugeben",
+              validator: function (value) {
+                return value > 0;
+              },
+            },
+            width: 50,
+          },
+          {
+            name: "l1",
+            type: "checkbox",
+            title: "L1",
+            width: 15,
+          },
+          {
+            name: "l2",
+            type: "checkbox",
+            title: "L2",
+            width: 15,
+          },
+          {
+            name: "l3",
+            type: "checkbox",
+            title: "L3",
+            width: 15,
+          },
+          {
+            name: "erzeuger",
+            title: "Erzeuger",
+            type: "checkbox",
+            width: 30,
+          },
+          {
+            name: "analog",
+            type: "checkbox",
+            title: "Analog",
+            width: 30,
+          },
+          {
+            name: "analog_min",
+            type: "text",
+            title: "Min",
+            width: 30,
+          },
+          {
+            name: "analog_max",
+            type: "text",
+            title: "Max",
+            width: 30,
+          },
+          {
+            name: "delay",
+            type: "number",
+            title: "Schaltv. in s",
+            width: 45,
+          },
+          {
+            type: "control",
+            width: 30
+          },
+        ],
+      });
+      onChange(false);
+      M.updateTextFields(); // function Materialize.updateTextFields(); to reinitialize all the Materialize labels on the page if you are dynamically adding inputs.
+    }
+
+    // ... and the function save has to exist.
+    // you have to make sure the callback is called with the settings object as first param!
+    function save(callback) {
+      // example: select elements with class=value and build settings object
+      devices = $("#jsGrid").jsGrid("option", "data");
+      var obj = {};
+      obj["devices"] = devices;
+      $("#jsGrid").jsGrid("reset");
+      obj["null_offset"] = $("#null_offset").val();
+      obj["winter_mode"] = $("#winter_mode").is(":checked");
+      callback(obj);
+    }
+  </script>
+</head>
+
+<body>
+  <!-- you have to put your config page in a div with id adapter-container -->
+  <div class="adapter-container">
+    <div class="m container">
+      <!-- Forms are the standard way to receive user inputted data.
+         Learn more http://materializecss.com/forms.html-->
+      <div class="row">
+        <div class="input-field col s6">
+          <img src="auto_strom.png" class="logo" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s12">
+          <p>
+            - Geräte mit niedriger Priorität werden zuerst an- und als letzte wieder
+            ausgestellt, sind also am meisten an
+          </p>
+          <p>
+            - "Verbrauch" ist vermuteter Maximalverbrauch.
+          </p>
+          <p>
+            - Phase (1, 2 oder 3) angeben. 0 eingeben oder leerlassen, falls Gerät auf allen Phasen läuft
+          </p>
+          <p>
+            - Für analoge Geräte können mit "Min" und "Max" die Schalt-Grenzen in Prozent angegeben werden
+          </p>
+          <p>
+            - Schaltverzögerung (ein und aus) <strong>in Sekunden</strong> angeben, sonst 0 oder
+            leer
+          </p>
+        </div>
+        <div class="col s6 input-field">
+          <input type="text" class="value" id="null_offset" />
+          <label for="null_offset">Offset von Null (größer null bedeutet, dass mehr bezogen als eingespeist
+            wird):</label>
+        </div>
+        <div class="col s6 input-field">
+          <input id="winter_mode" type="checkbox" class="value" />
+          <label for="winter_mode">Winter-Modus (analoge bevorzugt)</label>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div id="jsGrid"></div>
+    </div>
+  </div>
+</body>
+
+</html>
