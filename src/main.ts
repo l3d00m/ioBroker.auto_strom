@@ -10,12 +10,7 @@ import {
 } from './AutoStromModels';
 
 class AutoStrom extends utils.Adapter {
-    readonly AVAILABLE_POWER_IDS = [
-        'auto_strom.0.verbrauch_aktuell',
-        'auto_strom.0.verbrauch_l1',
-        'auto_strom.0.verbrauch_l2',
-        'auto_strom.0.verbrauch_l3',
-    ];
+    readonly AVAILABLE_POWER_ID = 'auto_strom.0.verbrauch_aktuell';
     readonly ERZEUGUNG_ID = 'auto_strom.0.erzeugung_aktuell';
     readonly AUTO_SUFFIX = '_AUTO';
     readonly USED_POWER_ID = 'USED_POWER';
@@ -59,7 +54,10 @@ class AutoStrom extends utils.Adapter {
             return;
         } else if (id.startsWith('auto_strom.')) {
             // ack state for all of our variables that are user set
-            if (!state.ack) return this.setState(id, state.val as boolean, true);
+            if (!state.ack) {
+                this.setState(id, state.val as boolean, true);
+                return;
+            }
         } else {
             this.log.warn(`Unknown subscribed state: ${id}`);
         }
@@ -136,19 +134,6 @@ class AutoStrom extends utils.Adapter {
 
     private initDevices(): void {
         this.config.devices.forEach((device) => {
-            const phasen = [];
-            if (device.l1) {
-                phasen.push(1);
-            }
-            if (device.l2) {
-                phasen.push(2);
-            }
-            if (device.l3) {
-                phasen.push(3);
-            }
-            if (phasen.length === 0) {
-                phasen.push(0);
-            }
             const newBaseDevice: BaseDevice = {
                 id: device.id,
                 // eslint-disable-next-line eqeqeq
@@ -158,7 +143,6 @@ class AutoStrom extends utils.Adapter {
                 delay_ms: typeof device.delay === 'number' && device.delay > 0 ? Number(device.delay) * 1000 : 0,
                 // eslint-disable-next-line eqeqeq
                 analog: !device.erzeuger && !!device.analog,
-                phasen: phasen,
             };
             if (isAnalog(newBaseDevice)) {
                 newBaseDevice.analog_max = this.getAsNumber(device.analog_max) || 100;
@@ -195,7 +179,7 @@ class AutoStrom extends utils.Adapter {
                 this.log.warn('State ' + device.id + ' is not set or does not exist, ignoring it. Error is: ' + err);
                 continue;
             }
-            const aliveId = device.id.substr(0, device.id.lastIndexOf('.') + 1) + 'alive';
+            const aliveId = device.id.substring(0, device.id.lastIndexOf('.') + 1) + 'alive';
             try {
                 // Get the alive state
                 const aliveState = await this.getForeignStateAsync(aliveId);
@@ -219,20 +203,15 @@ class AutoStrom extends utils.Adapter {
     private async checkForNewPower(): Promise<void> {
         // check that power is being produced first, else exit
         if (((await this.getStateAsync(this.ERZEUGUNG_ID))?.val as number) <= 0) {
-            this.mainTimeout = this.setTimeout(this.checkForNewPower.bind(this), 1000);
+            this.mainTimeout = this.setTimeout(this.checkForNewPower.bind(this), 1000)!;
             return;
         }
 
-        const powerPerPhase: Record<string, number> = {};
-        for (let i = 1; i <= 3; i++) {
-            powerPerPhase[i] = (await this.getStateAsync(this.AVAILABLE_POWER_IDS[i]))?.val as number;
-        }
-        const total_available =
-            powerPerPhase[0] + powerPerPhase[1] + powerPerPhase[2] + powerPerPhase[3] - this.NULL_OFFSET;
+        const total_available = ((await this.getStateAsync(this.AVAILABLE_POWER_ID))?.val as number) - this.NULL_OFFSET;
 
         if (Math.abs(total_available) < 70) {
             this.log.silly('Diff too small, trying again later');
-            this.mainTimeout = this.setTimeout(this.checkForNewPower.bind(this), 300);
+            this.mainTimeout = this.setTimeout(this.checkForNewPower.bind(this), 300)!;
             return;
         }
 
@@ -247,14 +226,11 @@ class AutoStrom extends utils.Adapter {
             const better_priority = total_available > 0 ? a.priority > b.priority : a.priority < b.priority;
             return a.priority === b.priority ? 0 : +better_priority || -1;
         });
-        const next_call_time = await this.startIteratingDevices(sorted_devices, powerPerPhase);
-        this.mainTimeout = this.setTimeout(this.checkForNewPower.bind(this), next_call_time);
+        const next_call_time = await this.startIteratingDevices(sorted_devices, total_available);
+        this.mainTimeout = this.setTimeout(this.checkForNewPower.bind(this), next_call_time)!;
     }
 
-    private async startIteratingDevices(
-        devices: AutoStromDevice[],
-        powerPerPhase: Record<string, number>,
-    ): Promise<number> {
+    private async startIteratingDevices(devices: AutoStromDevice[], total_available: number): Promise<number> {
         // Erst devices asychron preloaden, um danach Logik sychnron durchgehen zu können
         const fetchedDevices = await this.fetchDeviceState(devices);
         const digital_devices = fetchedDevices.filter(function (itm) {
@@ -264,7 +240,7 @@ class AutoStrom extends utils.Adapter {
             return isAnalog(itm);
         }) as AnalogDevice[];
 
-        const changedPower = this.setDevices(digital_devices, analog_devices, powerPerPhase);
+        const changedPower = this.setDevices(digital_devices, analog_devices, total_available);
 
         // Je nachdem wieviel geändert wurde, wird unterschiedlich lange gewartet,
         // um ein Oszillieren durch die Trägheit zu vermeiden
@@ -288,17 +264,14 @@ class AutoStrom extends utils.Adapter {
     private setDevices(
         digital_devices: DigitalDevice[],
         analog_devices: AnalogDevice[],
-        powerPerPhase: Record<string, number>,
+        total_available: number,
     ): number {
-        let available_power =
-            powerPerPhase[0] + powerPerPhase[1] + powerPerPhase[2] + powerPerPhase[3] - this.NULL_OFFSET; // fixme
+        let available_power = total_available - this.NULL_OFFSET;
         const mode_under_null = available_power >= 0;
-        // const mode_under_null = powerPerPhase.every((el) => el >= 0)
         let changed = 0;
 
         if (!mode_under_null) {
             // Wenn modus zu wenig, dann nicht jedes mal komplett runterregeln (gegen oszillieren)
-            // fixme powerPerPhase = powerPerPhase.map((el) => Math.round(el * 0.8))
             available_power = Math.round(available_power * 0.8);
         }
 

@@ -18,7 +18,6 @@ export interface BaseDevice {
     readonly delay_ms: number;
     readonly analog: boolean;
     readonly erzeuger: boolean;
-    readonly phasen: number[];
 }
 
 export interface AnalogDevice extends BaseDevice {
