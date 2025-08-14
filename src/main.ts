@@ -136,7 +136,7 @@ class AutoStrom extends utils.Adapter {
       if (device.l3) {
         phasen.push(3)
       }
-      if (phasen.length = 0) {
+      if (phasen.length === 0) {
         phasen.push(0)
       }
       const newBaseDevice:BaseDevice = {
@@ -218,7 +218,7 @@ class AutoStrom extends utils.Adapter {
     for (let i = 1; i<=3; i++) {
       powerPerPhase[i] = (await this.getStateAsync(this.AVAILABLE_POWER_IDS[i]))?.val as number
     }
-    const total_available = powerPerPhase[1] + powerPerPhase[2] + powerPerPhase[3] - this.NULL_OFFSET
+    const total_available = powerPerPhase[0] + powerPerPhase[1] + powerPerPhase[2] + powerPerPhase[3] - this.NULL_OFFSET
 
     if (Math.abs(total_available) < 70) {
       this.log.silly('Diff too small, trying again later')
@@ -261,7 +261,7 @@ class AutoStrom extends utils.Adapter {
   }
 
   private setDevices(digital_devices:DigitalDevice[], analog_devices:AnalogDevice[], powerPerPhase:Record<string, number>):number {
-    let available_power = powerPerPhase[1] + powerPerPhase[2] + powerPerPhase[3] - this.NULL_OFFSET // fixme
+    let available_power = powerPerPhase[0] + powerPerPhase[1] + powerPerPhase[2] + powerPerPhase[3] - this.NULL_OFFSET // fixme
     const mode_under_null = available_power >= 0
     // const mode_under_null = powerPerPhase.every((el) => el >= 0)
     let changed = 0
@@ -476,16 +476,6 @@ class AutoStrom extends utils.Adapter {
     }
     return additionalPower
   }
-
-  private isPreferred(itm_phasen: number[], preferred: boolean[]): boolean {
-    for (let i = 1; i<=3; i++) {
-      if (itm_phasen.includes(i) && !preferred[i]) {
-        return false
-      }
-    }
-    return true
-  }
-
 
   private updateUsedPower(devices:AutoStromDevice[]):void {
     let analogPowerUsed = 0
