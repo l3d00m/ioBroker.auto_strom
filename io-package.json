@@ -1,84 +1,84 @@
 {
-  "common": {
-    "name": "auto_strom",
-    "version": "2.0.0",
-    "news": {
-      "0.0.1": {
-        "en": "initial release",
-        "de": "Erstveröffentlichung",
-        "ru": "Начальная версия",
-        "pt": "lançamento inicial",
-        "nl": "Eerste uitgave",
-        "fr": "Première version",
-        "it": "Versione iniziale",
-        "es": "Versión inicial",
-        "pl": "Pierwsze wydanie",
-        "zh-cn": "首次出版"
-      }
+    "common": {
+        "name": "auto_strom",
+        "version": "2.0.0",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "zh-cn": "首次出版"
+            }
+        },
+        "title": "Auto Strom",
+        "titleLang": {
+            "en": "Auto Strom Regelung",
+            "de": "Auto Strom Regelung",
+            "ru": "Авто Стром",
+            "pt": "Auto Strom",
+            "nl": "Auto Strom",
+            "fr": "Auto Strom",
+            "it": "Auto Strom",
+            "es": "Auto Strom",
+            "pl": "Auto Strom",
+            "zh-cn": "汽车斯特罗姆"
+        },
+        "desc": {
+            "en": "Automatischer Energieverbrauch / -verteilung",
+            "de": "Automatischer Energieverbrauch / -verteilung",
+            "ru": "auto_strom",
+            "pt": "auto_strom",
+            "nl": "auto_strom",
+            "fr": "auto_strom",
+            "it": "auto_strom",
+            "es": "auto_strom",
+            "pl": "auto_strom",
+            "zh-cn": "auto_strom"
+        },
+        "authors": ["l3d00m <substantialimpulse@pm.me>"],
+        "keywords": ["ioBroker", "template", "Smart Home", "home automation"],
+        "license": "AGPL-3.0",
+        "platform": "Javascript/Node.js",
+        "main": "build/main.js",
+        "icon": "auto_strom.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/l3d00m/ioBroker.auto_strom/master/admin/auto_strom.png",
+        "readme": "https://github.com/l3d00m/ioBroker.auto_strom/blob/master/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "logic",
+        "compact": true,
+        "connectionType": "local",
+        "dataSource": "push",
+        "materialize": true,
+        "dependencies": [
+            {
+                "js-controller": ">=2.0.0"
+            }
+        ]
     },
-    "title": "Auto Strom",
-    "titleLang": {
-      "en": "Auto Strom Regelung",
-      "de": "Auto Strom Regelung",
-      "ru": "Авто Стром",
-      "pt": "Auto Strom",
-      "nl": "Auto Strom",
-      "fr": "Auto Strom",
-      "it": "Auto Strom",
-      "es": "Auto Strom",
-      "pl": "Auto Strom",
-      "zh-cn": "汽车斯特罗姆"
+    "native": {
+        "devices": [
+            {
+                "id": "sonoff.0.Beispiel.Power",
+                "priority": 1,
+                "verbrauch": 4000,
+                "analog": 0,
+                "analog_min": "",
+                "analog_max": "",
+                "delay": "",
+                "erzeuger": false
+            }
+        ],
+        "null_offset": 0,
+        "winter_mode": false
     },
-    "desc": {
-      "en": "Automatischer Energieverbrauch / -verteilung",
-      "de": "Automatischer Energieverbrauch / -verteilung",
-      "ru": "auto_strom",
-      "pt": "auto_strom",
-      "nl": "auto_strom",
-      "fr": "auto_strom",
-      "it": "auto_strom",
-      "es": "auto_strom",
-      "pl": "auto_strom",
-      "zh-cn": "auto_strom"
-    },
-    "authors": ["l3d00m <substantialimpulse@pm.me>"],
-    "keywords": ["ioBroker", "template", "Smart Home", "home automation"],
-    "license": "AGPL-3.0",
-    "platform": "Javascript/Node.js",
-    "main": "build/main.js",
-    "icon": "auto_strom.png",
-    "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/l3d00m/ioBroker.auto_strom/master/admin/auto_strom.png",
-    "readme": "https://github.com/l3d00m/ioBroker.auto_strom/blob/master/README.md",
-    "loglevel": "info",
-    "mode": "daemon",
-    "type": "logic",
-    "compact": true,
-    "connectionType": "local",
-    "dataSource": "push",
-    "materialize": true,
-    "dependencies": [
-      {
-        "js-controller": ">=2.0.0"
-      }
-    ]
-  },
-  "native": {
-    "devices": [
-      {
-        "id": "sonoff.0.Beispiel.Power",
-        "priority": 1,
-        "verbrauch": 4000,
-        "analog": 0,
-        "analog_min": "",
-        "analog_max": "",
-        "delay": "",
-        "erzeuger": false
-      }
-    ],
-    "null_offset": 0,
-    "winter_mode": false
-  },
-  "objects": [],
-  "instanceObjects": []
+    "objects": [],
+    "instanceObjects": []
 }

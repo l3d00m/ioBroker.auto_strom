@@ -37,13 +37,6 @@
         "inlineSourceMap": false,
         "watch": false
     },
-    "include": [
-        "src/**/*.ts",
-        "admin/**/*.ts",
-        "admin/**/*.tsx"
-    ],
-    "exclude": [
-        "build/**",
-        "node_modules/**"
-    ]
+    "include": ["src/**/*.ts", "admin/**/*.ts", "admin/**/*.tsx"],
+    "exclude": ["build/**", "node_modules/**"]
 }
