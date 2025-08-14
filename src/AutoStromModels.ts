@@ -7,9 +7,6 @@ export interface ConfigDevice {
     analog_max: any;
     delay: any;
     erzeuger: boolean | number | null;
-    l1: boolean | null;
-    l2: boolean | null;
-    l3: boolean | null;
 }
 export interface BaseDevice {
     readonly id: string;

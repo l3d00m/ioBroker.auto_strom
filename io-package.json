@@ -43,7 +43,7 @@
         },
         "authors": ["l3d00m <substantialimpulse@pm.me>"],
         "keywords": ["ioBroker", "template", "Smart Home", "home automation"],
-        "license": "AGPL-3.0",
+        "license": "MIT",
         "platform": "Javascript/Node.js",
         "main": "build/main.js",
         "icon": "auto_strom.png",
