@@ -2,27 +2,15 @@
 
 # ioBroker.auto_strom
 
-[![NPM version](https://img.shields.io/npm/v/iobroker.auto_strom.svg)](https://www.npmjs.com/package/iobroker.auto_strom)
-[![Downloads](https://img.shields.io/npm/dm/iobroker.auto_strom.svg)](https://www.npmjs.com/package/iobroker.auto_strom)
-![Number of Installations](https://iobroker.live/badges/auto_strom-installed.svg)
-![Current version in stable repository](https://iobroker.live/badges/auto_strom-stable.svg)
-
-[![NPM](https://nodei.co/npm/iobroker.auto_strom.png?downloads=true)](https://nodei.co/npm/iobroker.auto_strom/)
-
 **Tests:** ![Test and Release](https://github.com/l3d00m/ioBroker.auto_strom/workflows/Test%20and%20Release/badge.svg)
 
 ## auto_strom adapter for ioBroker
 
-Describe your project here
+Nicht als öffentlicher Adapter gedacht, deshalb keinen Support. Sollte besser nirgendwo anders eingebunden werden.
 
 ## Developer manual
 
 This section is intended for the developer. It can be deleted later.
-
-### DISCLAIMER
-
-Please make sure that you consider copyrights and trademarks when you use names or logos of a company and add a disclaimer to your README.
-You can check other adapters for examples or ask in the developer community. Using a name or logo of a company without permission may cause legal problems for you.
 
 ### Getting started
 
@@ -119,17 +107,6 @@ dev-server watch
 The ioBroker.admin interface will then be available at http://localhost:8081/
 
 Please refer to the [`dev-server` documentation](https://github.com/ioBroker/dev-server#command-line) for more details.
-
-## Changelog
-
-<!--
-    Placeholder for the next version (at the beginning of the line):
-    ### **WORK IN PROGRESS**
--->
-
-### **WORK IN PROGRESS**
-
-- (l3) initial release
 
 ## License
 
